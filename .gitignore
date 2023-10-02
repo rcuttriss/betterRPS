@@ -1,0 +1,25 @@
+# Node.js specific
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+
+# Elastic Beanstalk specific
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# OS-specific
+.DS_Store  # macOS
+Thumbs.db  # Windows
+*.log
+
+# IDE-specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables or secrets
+.env
+``
