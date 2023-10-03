@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3010;
 
 let rooms = {};
 let playerList = {};
+let roomCreators = new Set();
 
 function updateRooms() {
   io.to("lobby").emit("updateRooms", rooms);
@@ -21,17 +22,25 @@ function updatePlayerList(id, roomName) {
 io.on("connection", (socket) => {
   console.log("a user connected:", socket.id);
 
-  // Join the user to the lobby
   socket.join("lobby");
   updatePlayerList(socket.id, "lobby");
   updateRooms();
 
   socket.on("joinRoom", (roomName) => {
+    console.log(`${socket.id} is joining room ${roomName}...`);
     let room = rooms[roomName];
+
+    if (roomCreators.has(socket.id)) {
+      socket.emit("error", "You can only create one room.");
+      return;
+    }
 
     if (!room) {
       console.log(`creating room ${roomName}`);
+      roomCreators.add(socket.id);
+      socket.leave("lobby");
       socket.join(roomName);
+
       updatePlayerList(socket.id, roomName);
       rooms[roomName] = {
         player1: socket.id,
@@ -43,7 +52,9 @@ io.on("connection", (socket) => {
       };
       updateRooms();
     } else if (!room.player2) {
+      socket.leave("lobby");
       socket.join(roomName);
+
       updatePlayerList(socket.id, roomName);
       room.player2 = socket.id;
       updateRooms();
@@ -122,8 +133,9 @@ io.on("connection", (socket) => {
     }
 
     if (!room.player1 && !room.player2) {
+      roomCreators.delete(socket.id);
       delete rooms[roomName];
-      delete playerList[socket.id]; // Clear entry from playerList
+      delete playerList[socket.id];
     }
   });
 });

@@ -12,3 +12,7 @@ button {
 .choices {
     display: none;
 }
+
+.feedback-line {
+    font-size: 2rem;
+}
